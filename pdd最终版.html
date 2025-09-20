@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>现金大转盘</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #ff4e22 0%, #ff9500 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 414px;
+            margin: 0 auto;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header .subtitle {
+            font-size: 16px;
+            margin-top: 8px;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .amount-display {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .current-amount {
+            font-size: 48px;
+            font-weight: bold;
+            color: #ff4e22;
+            margin-bottom: 10px;
+        }
+        
+        .target-amount {
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .progress-container {
+            background: #f8f8f8;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .progress-bar {
+            height: 12px;
+            background: #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff9500, #ff4e22);
+            border-radius: 6px;
+            width: 80%;
+            transition: width 0.5s ease;
+        }
+        
+        .stage-info {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 16px;
+            color: #ff4e22;
+            font-weight: bold;
+        }
+        
+        .stage-tip {
+            text-align: center;
+            font-size: 16px;
+            color: #ff9500;
+            margin: 10px 0 20px;
+            font-weight: bold;
+        }
+        
+        .roulette-container {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin: 0 auto 30px;
+        }
+        
+        .roulette-wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #fff8e1;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(255, 149, 0, 0.3);
+            border: 8px solid #ffcc80;
+            transition: transform 2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        }
+        
+        .roulette-item {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            left: 0;
+            top: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 5px;
+            box-sizing: border-box;
+        }
+        
+        .roulette-item-content {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            transform: rotate(45deg) translate(-20px, -20px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-weight: bold;
+            color: #ff4e22;
+            font-size: 12px;
+            line-height: 1.2;
+            word-break: break-all;
+            padding: 5px;
+        }
+        
+        .roulette-pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            z-index: 10;
+            filter: drop-shadow(0 3px 5px rgba(0,0,0,0.3));
+        }
+        
+        .spin-btn {
+            background: linear-gradient(135deg, #ff4e22, #ff9500);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 15px 0;
+            width: 80%;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px auto;
+            display: block;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 79, 34, 0.4);
+        }
+        
+        .share-btn {
+            background: white;
+            color: #ff4e22;
+            border: 2px solid #ffcc80;
+            border-radius: 30px;
+            padding: 12px 0;
+            width: 80%;
+            font-size: 16px;
+            margin: 10px auto;
+            display: block;
+            cursor: pointer;
+        }
+        
+        .chances-info {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 20px;
+            width: 80%;
+            max-width: 300px;
+            padding: 30px;
+            text-align: center;
+            animation: popIn 0.5s ease;
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #ff4e22;
+        }
+        
+        .modal-amount {
+            font-size: 36px;
+            color: #ff4e22;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        
+        .modal-stage {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .modal-btn {
+            background: linear-gradient(135deg, #ff4e22, #ff9500);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 25px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        .share-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .share-content {
+            background-color: white;
+            border-radius: 20px;
+            width: 80%;
+            max-width: 300px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .share-options {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        
+        .share-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .share-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #fff8e1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>现金大转盘</h1>
+            <div class="subtitle">转出好运，领100元现金</div>
+        </div>
+        
+        <div class="main-content">
+            <div class="amount-display">
+                <div class="current-amount" id="current-amount">¥80.00</div>
+                <div class="target-amount">目标金额: ¥100.00</div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-text">
+                    <span>当前进度</span>
+                    <span id="progress-percent">80%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+            
+            <div class="stage-info" id="stage-info">现金阶段 · 继续赚取现金</div>
+            <div class="stage-tip" id="stage-tip">还差20元就能提现</div>
+            
+            <div class="roulette-container">
+                <div class="roulette-wheel" id="roulette-wheel">
+                    <!-- 转盘内容由JavaScript动态生成 -->
+                </div>
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 0 L65 40 L100 50 L65 60 L50 100 L35 60 L0 50 L35 40 Z' fill='%23ff4e22'/%3E%3C/svg%3E" class="roulette-pointer">
+            </div>
+            
+            <button class="spin-btn" id="spin-btn">立即转动 (剩余10次)</button>
+            <button class="share-btn" id="share-btn">邀请好友加速</button>
+            <div class="chances-info" id="chances-info">您有10次免费转动机会</div>
+        </div>
+    </div>
+    
+    <div class="result-modal" id="result-modal">
+        <div class="modal-content">
+            <div class="modal-title" id="modal-title">恭喜获得</div>
+            <div class="modal-amount" id="modal-amount">¥0.50</div>
+            <div class="modal-stage" id="modal-stage">现金阶段进度更新</div>
+            <button class="modal-btn" id="close-modal">继续赚现金</button>
+        </div>
+    </div>
+    
+    <div class="share-modal" id="share-modal">
+        <div class="share-content">
+            <div class="modal-title">分享给好友</div>
+            <div>邀请好友助力，加速提现</div>
+            <div class="share-options">
+                <div class="share-option" onclick="shareTo('wechat')">
+                    <div class="share-icon">微</div>
+                    <div>微信</div>
+                </div>
+                <div class="share-option" onclick="shareTo('moments')">
+                    <div class="share-icon">朋</div>
+                    <div>朋友圈</div>
+                </div>
+                <div class="share-option" onclick="shareTo('qq')">
+                    <div class="share-icon">Q</div>
+                    <div>QQ</div>
+                </div>
+            </div>
+            <button class="modal-btn" id="close-share-modal">取消</button>
+        </div>
+    </div>
+    
+    <script>
+        // 游戏状态数据
+        const gameState = {
+            currentAmount: 80.00,
+            targetAmount: 100.00,
+            currentStage: 'cash', // cash, yuanbao, diamond
+            yuanbao: 0,
+            diamond: 0,
+            spinChances: 10, // 初始10次机会
+            yuanbaoNeeded: 10,
+            diamondNeeded: 10
+        };
+
+        // 不同阶段的奖项配置（现金阶段大幅提高金额）
+        const prizeConfig = {
+            cash: [
+                { text: "8元", amount: 8.00, probability: 0.25 },
+                { text: "5元", amount: 5.00, probability: 0.20 },
+                { text: "3元", amount: 3.00, probability: 0.15 },
+                { text: "2元", amount: 2.00, probability: 0.12 },
+                { text: "1元", amount: 1.00, probability: 0.10 },
+                { text: "0.8元", amount: 0.80, probability: 0.08 },
+                { text: "0.5元", amount: 0.50, probability: 0.06 },
+                { text: "优惠券", amount: 0.00, probability: 0.04 }
+            ],
+            yuanbao: [
+                { text: "3元宝", amount: 3, probability: 0.20 },
+                { text: "2元宝", amount: 2, probability: 0.30 },
+                { text: "1元宝", amount: 1, probability: 0.25 },
+                { text: "谢谢参与", amount: 0, probability: 0.15 },
+                { text: "优惠券", amount: 0, probability: 0.10 }
+            ],
+            diamond: [
+                { text: "3钻石", amount: 3, probability: 0.15 },
+                { text: "2钻石", amount: 2, probability: 0.25 },
+                { text: "1钻石", amount: 1, probability: 0.30 },
+                { text: "谢谢参与", amount: 0, probability: 0.20 },
+                { text: "优惠券", amount: 0, probability: 0.10 }
+            ]
+        };
+        
+        // DOM元素
+        const rouletteWheel = document.getElementById('roulette-wheel');
+        const spinBtn = document.getElementById('spin-btn');
+        const shareBtn = document.getElementById('share-btn');
+        const resultModal = document.getElementById('result-modal');
+        const shareModal = document.getElementById('share-modal');
+        const currentAmountEl = document.getElementById('current-amount');
+        const progressFill = document.getElementById('progress-fill');
+        const progressPercent = document.getElementById('progress-percent');
+        const stageInfoEl = document.getElementById('stage-info');
+        const stageTipEl = document.getElementById('stage-tip');
+        const modalTitleEl = document.getElementById('modal-title');
+        const modalAmountEl = document.getElementById('modal-amount');
+        const modalStageEl = document.getElementById('modal-stage');
+        const chancesInfoEl = document.getElementById('chances-info');
+        
+        // 初始化页面
+        function initPage() {
+            updateRouletteItems();
+            updateUI();
+        }
+        
+        // 更新转盘奖项
+        function updateRouletteItems() {
+            rouletteWheel.innerHTML = '';
+            const prizes = prizeConfig[gameState.currentStage];
+            const segmentAngle = 360 / prizes.length;
+            
+            prizes.forEach((prize, index) => {
+                const angle = segmentAngle * index;
+                const item = document.createElement('div');
+                item.className = 'roulette-item';
+                item.style.transform = `rotate(${angle}deg)`;
+                item.style.background = index % 2 === 0 ? '#ffecb3' : '#fff8e1';
+                
+                const content = document.createElement('div');
+                content.className = 'roulette-item-content';
+                content.textContent = prize.text;
+                
+                // 根据文本长度调整字体大小和位置
+                if (prize.text.length > 4) {
+                    content.style.fontSize = '10px';
+                    content.style.transform = 'rotate(45deg) translate(-18px, -18px)';
+                } else {
+                    content.style.fontSize = '12px';
+                    content.style.transform = 'rotate(45deg) translate(-20px, -20px)';
+                }
+                
+                item.appendChild(content);
+                rouletteWheel.appendChild(item);
+            });
+        }
+        
+        // 更新UI显示
+        function updateUI() {
+            currentAmountEl.textContent = `¥${gameState.currentAmount.toFixed(2)}`;
+            
+            // 更新进度条
+            const progress = (gameState.currentAmount / gameState.targetAmount * 100);
+            progressFill.style.width = `${Math.min(progress, 100)}%`;
+            progressPercent.textContent = `${Math.min(progress, 100).toFixed(1)}%`;
+            
+            // 更新阶段信息和提示
+            let stageText = '';
+            let tipText = '';
+            
+            if (gameState.currentStage === 'cash') {
+                const remaining = 100 - gameState.currentAmount;
+                stageText = `现金阶段 · 继续赚取现金`;
+                tipText = `还差${remaining.toFixed(0)}元就能提现`;
+            } else if (gameState.currentStage === 'yuanbao') {
+                stageText = `元宝阶段 · ${gameState.yuanbao}/${gameState.yuanbaoNeeded}个元宝`;
+                tipText = `10个元宝即能兑换0.1元！离提现成功最后一步`;
+            } else if (gameState.currentStage === 'diamond') {
+                stageText = `钻石阶段 · ${gameState.diamond}/${gameState.diamondNeeded}个钻石`;
+                tipText = `10个钻石即能兑换1个元宝！离提现成功最后一步`;
+            }
+            
+            stageInfoEl.textContent = stageText;
+            stageTipEl.textContent = tipText;
+            
+            // 更新按钮状态和机会信息
+            spinBtn.disabled = gameState.spinChances <= 0;
+            if (gameState.spinChances <= 0) {
+                spinBtn.textContent = "机会已用完";
+                spinBtn.style.background = "#ccc";
+            } else {
+                spinBtn.textContent = `立即转动 (剩余${gameState.spinChances}次)`;
+                spinBtn.style.background = "linear-gradient(135deg, #ff4e22, #ff9500)";
+            }
+            
+            chancesInfoEl.textContent = `您有${gameState.spinChances}次免费转动机会`;
+        }
+        
+        // 生成随机奖励
+        function generatePrize() {
+            const prizes = prizeConfig[gameState.currentStage];
+            const random = Math.random();
+            let cumulativeProbability = 0;
+            
+            for (const prize of prizes) {
+                cumulativeProbability += prize.probability;
+                if (random <= cumulativeProbability) {
+                    return prize;
+                }
+            }
+            
+            return prizes[0]; // 默认返回第一个奖励
+        }
+        
+        // 计算转盘停止角度
+        function calculateStopAngle(prizeIndex) {
+            const prizes = prizeConfig[gameState.currentStage];
+            const segmentAngle = 360 / prizes.length;
+            const targetAngle = 360 - (prizeIndex * segmentAngle) + 360 * 4; // 转4圈
+            return targetAngle;
+        }
+        
+        // 转动转盘
+        function spinRoulette() {
+            if (gameState.spinChances <= 0) return;
+            
+            // 禁用按钮防止重复点击
+            spinBtn.disabled = true;
+            spinBtn.textContent = "转盘中...";
+            
+            // 生成奖励
+            const prize = generatePrize();
+            const prizes = prizeConfig[gameState.currentStage];
+            const prizeIndex = prizes.findIndex(p => p.text === prize.text);
+            
+            // 计算转盘停止位置
+            const targetAngle = calculateStopAngle(prizeIndex);
+            
+            // 执行转盘动画（加快到2秒）
+            rouletteWheel.style.transition = 'transform 2s cubic-bezier(0.17, 0.67, 0.83, 0.67)';
+            rouletteWheel.style.transform = `rotate(${targetAngle}deg)`;
+            
+            // 动画结束后处理奖励
+            setTimeout(() => {
+                processPrize(prize);
+                gameState.spinChances--;
+                updateUI();
+            }, 2000);
+        }
+        
+        // 处理奖励
+        function processPrize(prize) {
+            if (gameState.currentStage === 'cash') {
+                if (prize.amount > 0) {
+                    gameState.currentAmount += prize.amount;
+                }
+                
+                // 检查是否进入元宝阶段（到达100元）
+                if (gameState.currentAmount >= 99.9) {
+                    gameState.currentStage = 'yuanbao';
+                    gameState.currentAmount = 99.9;
+                    updateRouletteItems();
+                }
+            } else if (gameState.currentStage === 'yuanbao') {
+                if (prize.amount > 0) {
+                    gameState.yuanbao += prize.amount;
+                }
+                
+                // 检查是否进入钻石阶段
+                if (gameState.yuanbao >= 9) {
+                    gameState.currentStage = 'diamond';
+                    updateRouletteItems();
+                }
+            } else if (gameState.currentStage === 'diamond') {
+                if (prize.amount > 0) {
+                    gameState.diamond += prize.amount;
+                }
+                
+                // 检查是否完成所有阶段
+                if (gameState.diamond >= gameState.diamondNeeded) {
+                    gameState.currentAmount = 100.00;
+                    alert('恭喜！您已成功提现100元！');
+                }
+            }
+            
+            // 显示结果
+            showResult(prize);
+        }
+        
+        // 显示结果
+        function showResult(prize) {
+            modalTitleEl.textContent = "恭喜获得";
+            modalAmountEl.textContent = prize.text;
+            
+            if (gameState.currentStage === 'cash') {
+                modalStageEl.textContent = `现金增加至¥${gameState.currentAmount.toFixed(2)}`;
+            } else if (gameState.currentStage === 'yuanbao') {
+                modalStageEl.textContent = `累计${gameState.yuanbao}个元宝`;
+            } else if (gameState.currentStage === 'diamond') {
+                modalStageEl.textContent = `累计${gameState.diamond}个钻石`;
+            }
+            
+            resultModal.style.display = 'flex';
+        }
+        
+        // 分享功能
+        function shareTo(platform) {
+            alert(`已模拟分享到${platform}`);
+            shareModal.style.display = 'none';
+            
+            // 分享成功增加转盘机会
+            gameState.spinChances += 3;
+            updateUI();
+            
+            alert('分享成功！获得3次额外转盘机会！');
+        }
+        
+        // 事件监听
+        spinBtn.addEventListener('click', spinRoulette);
+        
+        shareBtn.addEventListener('click', function() {
+            shareModal.style.display = 'flex';
+        });
+        
+        document.getElementById('close-modal').addEventListener('click', function() {
+            resultModal.style.display = 'none';
+            // 重置转盘位置
+            setTimeout(() => {
+                rouletteWheel.style.transition = 'none';
+                rouletteWheel.style.transform = 'rotate(0deg)';
+            }, 100);
+        });
+        
+        document.getElementById('close-share-modal').addEventListener('click', function() {
+            shareModal.style.display = 'none';
+        });
+        
+        // 初始化页面
+        initPage();
+    </script>
+</body>
+</html>
