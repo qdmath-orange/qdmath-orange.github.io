@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* 保持您原有的所有样式不变 */
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .experiment-info {
+            background: linear-gradient(120deg, #e3f2fd 0%, #f3e5f5 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid #3498db;
+        }
+        .ball {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 50px;
+            margin: 8px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .white-ball {
+            background: linear-gradient(145deg, #ffffff 0%, #e0e0e0 100%);
+            color: #333;
+            border: 2px solid #bdbdbd;
+        }
+        .black-ball {
+            background: linear-gradient(145deg, #424242 0%, #212121 100%);
+        }
+        .control-panel {
+            margin: 25px 0;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            background-color: #fafafa;
+        }
+        .tree-diagram-container {
+            position: relative;
+            min-height: 500px;
+            overflow: auto;
+            padding: 30px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            background-color: #fefefe;
+        }
+        .outcome {
+            margin: 12px 0;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+        }
+        .frequency-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .frequency-table th, .frequency-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        .frequency-table th {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+        .frequency-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .frequency-table tr.total {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            font-weight: bold;
+        }
+        button {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+        }
+        input, select {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .section {
+            margin: 30px 0;
+        }
+        .section-title {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .result-ball {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .analysis-panel {
+            background: linear-gradient(120deg, #fff3e0 0%, #ffecb3 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #ff9800;
+        }
+        
+        /* 树状图样式 */
+        .tree-node {
+            position: absolute;
+            padding: 8px 15px;
+            background: white;
+            border: 2px solid #3498db;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+            min-width: 60px;
+            z-index: 10;
+        }
+        .tree-node.root {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border-color: #2980b9;
+        }
+        .tree-connection {
+            position: absolute;
+            background: #3498db;
+            height: 2px;
+            z-index: 1;
+            transform-origin: 0 0;
+        }
+        .tree-level-1 { background: #e3f2fd; border-color: #2196f3; }
+        .tree-level-2 { background: #f3e5f5; border-color: #9c27b0; }
+        .tree-level-3 { background: #e8f5e8; border-color: #4caf50; }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="experiment-info">
+            <p><strong>实验配置：</strong></p>
+            <div id="ballsDisplay">
+                <span class="ball white-ball">W1</span>
+                <span class="ball white-ball">W2</span>
+                <span class="ball white-ball">W3</span>
+                <span class="ball black-ball">B1</span>
+                <span class="ball black-ball">B2</span>
+            </div>
+            <p>共有5个球：3个白球（W1, W2, W3），2个黑球（B1, B2）</p>
+        </div>
+        
+        <div class="control-panel">
+            <h3>实验参数设置</h3>
+            <label>摸球方式：</label>
+            <select id="drawMode">
+                <option value="with_replacement">有放回</option>
+                <option value="without_replacement">无放回</option>
+            </select>
+            
+            <label>摸球次数：</label>
+            <input type="number" id="drawCount" min="1" max="5" value="2">
+            
+            <label>模拟次数：</label>
+            <input type="number" id="simulationCount" min="10" max="10000" value="100">
+            
+            <button onclick="generateTreeDiagram()">生成树状图</button>
+            <button onclick="runSimulation()">开始模拟实验</button>
+        </div>
+
+        <div class="analysis-panel">
+            <h3>结果分析设置</h3>
+            <label>分析出现</label>
+            <input type="number" id="targetCount" min="0" max="5" value="1">
+            <label>次</label>
+            <select id="targetColor">
+                <option value="white">白球</option>
+                <option value="black">黑球</option>
+            </select>
+            <label>的频率</label>
+            <button onclick="analyzeResults()">分析结果</button>
+            <div id="analysisResults" style="margin-top: 15px;"></div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">树状图展示</h2>
+            <div class="controls">
+                <button onclick="zoomTree(0.1)">放大</button>
+                <button onclick="zoomTree(-0.1)">缩小</button>
+                <button onclick="resetTree()">重置视图</button>
+                <span id="zoomLevel">缩放: 100%</span>
+            </div>
+            <div class="tree-diagram-container" id="treeDiagram">
+                <p>点击"生成树状图"按钮显示所有可能的结果路径</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">模拟实验结果</h2>
+            <div id="simulationResults">
+                <p>点击"开始模拟实验"按钮查看频率统计结果</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 球的数据
+        const balls = [
+            {id: 'W1', type: 'white', name: '白球1'},
+            {id: 'W2', type: 'white', name: '白球2'},
+            {id: 'W3', type: 'white', name: '白球3'},
+            {id: 'B1', type: 'black', name: '黑球1'},
+            {id: 'B2', type: 'black', name: '黑球2'}
+        ];
+        
+        let simulationData = [];
+        let currentZoom = 1;
+        
+        // 获取可用的球
+        function getAvailableBalls(drawMode, currentOutcome) {
+            if (drawMode === 'with_replacement') {
+                return balls;
+            } else {
+                const usedBallIds = currentOutcome.map(ball => ball.id);
+                return balls.filter(ball => !usedBallIds.includes(ball.id));
+            }
+        }
+        
+        // 生成所有可能的结果
+        function generateAllOutcomes(drawMode, drawCount) {
+            let outcomes = [[]];
+            
+            for (let i = 0; i < drawCount; i++) {
+                const newOutcomes = [];
+                
+                outcomes.forEach(outcome => {
+                    const availableBalls = getAvailableBalls(drawMode, outcome);
+                    
+                    availableBalls.forEach(ball => {
+                        newOutcomes.push([...outcome, ball]);
+                    });
+                });
+                
+                outcomes = newOutcomes;
+            }
+            
+            return outcomes;
+        }
+        
+        // 生成树状图 - 修复后的函数
+        function generateTreeDiagram() {
+            const drawMode = document.getElementById('drawMode').value;
+            const drawCount = parseInt(document.getElementById('drawCount').value);
+            const container = document.getElementById('treeDiagram');
+            
+            console.log("生成树状图函数被调用", {drawMode, drawCount});
+            
+            if (drawCount > 5) {
+                container.innerHTML = '<p>摸球次数过多，树状图可能过于复杂</p>';
+                return;
+            }
+            
+            const allOutcomes = generateAllOutcomes(drawMode, drawCount);
+            container.innerHTML = '';
+            
+            // 创建简单的树状图展示
+            let html = `<h3>树状图展示（共${allOutcomes.length}种可能结果）</h3>`;
+            
+            // 显示所有可能结果
+            html += '<div style="margin-top: 20px;">';
+            html += '<h4>所有可能路径：</h4>';
+            
+            allOutcomes.forEach((outcome, index) => {
+                html += '<div class="outcome">';
+                html += `<span style="font-weight:bold; margin-right:10px;">${index + 1}.</span>`;
+                
+                outcome.forEach((ball, ballIndex) => {
+                    const ballClass = ball.type === 'white' ? 'white-ball' : 'black-ball';
+                    html += `<span class="ball ${ballClass}" style="width:35px;height:35px;line-height:35px;font-size:12px;">${ball.id}</span>`;
+                    if (ballIndex < outcome.length - 1) {
+                        html += ' → ';
+                    }
+                });
+                
+                html += '</div>';
+            });
+            html += '</div>';
+            
+            container.innerHTML = html;
+        }
+        
+        // 执行单次摸球
+        function performSingleDraw(drawMode, drawCount) {
+            const outcome = [];
+            let availableBalls = [...balls];
+            
+            for (let i = 0; i < drawCount; i++) {
+                if (availableBalls.length === 0) break;
+                
+                const randomIndex = Math.floor(Math.random() * availableBalls.length);
+                const drawnBall = availableBalls[randomIndex];
+                outcome.push(drawnBall);
+                
+                if (drawMode === 'without_replacement') {
+                    availableBalls.splice(randomIndex, 1);
+                }
+            }
+            
+            return outcome;
+        }
+        
+        // 运行模拟实验 - 修复后的函数
+        function runSimulation() {
+            const drawMode = document.getElementById('drawMode').value;
+            const drawCount = parseInt(document.getElementById('drawCount').value);
+            const simulationCount = parseInt(document.getElementById('simulationCount').value);
+            const resultsDiv = document.getElementById('simulationResults');
+            
+            console.log("运行模拟实验函数被调用", {drawMode, drawCount, simulationCount});
+            
+            if (simulationCount > 10000) {
+                resultsDiv.innerHTML = '<p>模拟次数过多，可能会影响性能</p>';
+                return;
+            }
+            
+            // 执行模拟
+            const results = {};
+            simulationData = [];
+            
+            for (let i = 0; i < simulationCount; i++) {
+                const outcome = performSingleDraw(drawMode, drawCount);
+                const outcomeKey = outcome.map(ball => ball.id).join('-');
+                simulationData.push(outcome);
+                
+                if (results[outcomeKey]) {
+                    results[outcomeKey]++;
+                } else {
+                    results[outcomeKey] = 1;
+                }
+            }
+            
+            // 显示结果
+            displaySimulationResults(results, simulationCount, resultsDiv);
+        }
+        
+        // 显示模拟结果
+        function displaySimulationResults(results, totalSimulations, container) {
+            let html = '<h3>频率统计表</h3>';
+            html += '<table class="frequency-table">';
+            html += '<tr><th>结果</th><th>出现次数</th><th>频率</th></tr>';
+            
+            const sortedResults = Object.entries(results).sort((a, b) => b[1] - a[1]);
+            
+            sortedResults.forEach(([outcome, count]) => {
+                const frequency = (count / totalSimulations).toFixed(4);
+                html += `<tr><td>${outcome}</td><td>${count}</td><td>${frequency}</td></tr>`;
+            });
+            
+            html += `<tr class="total">`;
+            html += `<td>总计</td><td>${totalSimulations}</td><td>1.0000</td>`;
+            html += '</tr>';
+            html += '</table>';
+            
+            container.innerHTML = html;
+        }
+        
+        // 分析结果 - 修复后的函数
+        function analyzeResults() {
+            const targetCount = parseInt(document.getElementById('targetCount').value);
+            const targetColor = document.getElementById('targetColor').value;
+            const analysisDiv = document.getElementById('analysisResults');
+            
+            console.log("分析结果函数被调用", {targetCount, targetColor});
+            
+            if (simulationData.length === 0) {
+                analysisDiv.innerHTML = '<p style="color: red;">请先运行模拟实验</p>';
+                return;
+            }
+            
+            let matchCount = 0;
+            simulationData.forEach(outcome => {
+                const colorCount = outcome.filter(ball => ball.type === targetColor).length;
+                if (colorCount === targetCount) {
+                    matchCount++;
+                }
+            });
+            
+            const frequency = (matchCount / simulationData.length).toFixed(4);
+            
+            let html = `<div style="padding: 15px; background: white; border-radius: 8px; border-left: 4px solid #ff9800;">`;
+            html += `<h4>分析结果：</h4>`;
+            html += `<p>在 ${simulationData.length} 次模拟中，出现 <strong>${targetCount} 次${targetColor === 'white' ? '白球' : '黑球'}</strong> 的结果共有 <strong>${matchCount}</strong> 次</p>`;
+            html += `<p>频率：<strong>${frequency}</strong></p>`;
+            html += `</div>`;
+            
+            analysisDiv.innerHTML = html;
+        }
+        
+        // 缩放功能
+        function zoomTree(zoomDelta) {
+            currentZoom += zoomDelta;
+            currentZoom = Math.max(0.5, Math.min(2, currentZoom));
+            
+            const container = document.getElementById('treeDiagram');
+            container.style.transform = `scale(${currentZoom})`;
+            container.style.transformOrigin = 'top left';
+            
+            document.getElementById('zoomLevel').textContent = `缩放: ${Math.round(currentZoom * 100)}%`;
+        }
+        
+        // 重置视图
+        function resetTree() {
+            currentZoom = 1;
+            const container = document.getElementById('treeDiagram');
+            container.style.transform = 'scale(1)';
+            document.getElementById('zoomLevel').textContent = '缩放: 100%';
+        }
+        
+        // 页面加载时初始化
+        window.onload = function() {
+            console.log("页面加载完成");
+            // 可以在这里添加初始化代码
+        };
+    </script>
+</body>
+</html>
