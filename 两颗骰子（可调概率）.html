@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>双骰骰子模拟器（可调概率）</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        .dice-container {
+            text-align: center;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+
+        .dice {
+            width: 70px;
+            height: 70px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            font-weight: bold;
+            margin: 8px;
+            transition: transform 0.4s ease;
+        }
+
+        .dice:hover {
+            transform: rotate(360deg);
+            cursor: pointer;
+        }
+
+        .chart {
+            display: grid;
+            grid-template-columns: repeat(11, 1fr);
+            gap: 2px;
+            background: #eee;
+            padding: 5px;
+            border-radius: 5px;
+            height: 200px;
+            margin-bottom: 20px;
+        }
+
+        .bar {
+            background: #4CAF50;
+            transition: height 0.5s ease;
+            border-radius: 3px;
+            align-self: end;
+        }
+
+        .controls {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        input[type="number"] {
+            padding: 6px;
+            width: 60px;
+            margin-right: 5px;
+            font-size: 14px;
+        }
+
+        button {
+            padding: 8px 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .probability-table {
+            margin-top: 15px;
+            width: 100%;
+            font-size: 13px;
+        }
+
+        .probability-table th {
+            padding: 5px;
+        }
+
+        .probability-table td {
+            padding: 3px;
+        }
+
+        .probability-input {
+            width: 40px;
+            text-align: center;
+            padding: 3px;
+            font-size: 12px;
+        }
+
+        .probability-sum {
+            margin-top: 8px;
+            font-weight: bold;
+            color: #d32f2f;
+            font-size: 13px;
+        }
+
+        .chart-container {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <input type="number" id="rolls" min="1" value="100" placeholder="抛掷次数">
+        <button onclick="startSimulation()">开始模拟</button>
+    </div>
+
+    <div class="container">
+        <div class="dice-container">
+            <div id="dice1" class="dice">?</div>
+            <div id="dice2" class="dice">?</div>
+            
+            <h3 style="margin-top: 15px; font-size: 16px;">骰子概率设置</h3>
+            <table class="probability-table">
+                <tr>
+                    <th>点数</th>
+                    <th>1</th>
+                    <th>2</th>
+                    <th>3</th>
+                    <th>4</th>
+                    <th>5</th>
+                    <th>6</th>
+                </tr>
+                <tr>
+                    <td>权重</td>
+                    <td><input type="number" class="probability-input" value="1" min="0" step="0.1" onchange="updateProbabilitySum()"></td>
+                    <td><input type="number" class="probability-input" value="1" min="0" step="0.1" onchange="updateProbabilitySum()"></td>
+                    <td><input type="number" class="probability-input" value="1" min="0" step="0.1" onchange="updateProbabilitySum()"></td>
+                    <td><input type="number" class="probability-input" value="1" min="0" step="0.1" onchange="updateProbabilitySum()"></td>
+                    <td><input type="number" class="probability-input" value="1" min="0" step="0.1" onchange="updateProbabilitySum()"></td>
+                    <td><input type="number" class="probability-input" value="1" min="0" step="0.1" onchange="updateProbabilitySum()"></td>
+                </tr>
+            </table>
+            <div id="probabilitySum" class="probability-sum">权重总和: 6.0</div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart" id="chart"></div>
+            <h3 style="margin-top: 10px; font-size: 16px;">频数统计表</h3>
+            <table id="resultTable">
+                <tr>
+                    <th>点数和</th>
+                    <th>出现次数</th>
+                    <th>频率</th>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const frequency = new Array(13).fill(0); // 存储2-12点的频率
+        const chartBars = new Array(11).fill().map(() => document.createElement('div'));
+        let probabilities = [1, 1, 1, 1, 1, 1]; // 默认等概率
+        let cumulativeProbabilities = []; // 累积概率
+
+        function initializeChart() {
+            const chart = document.getElementById('chart');
+            chart.innerHTML = '';
+            chartBars.forEach((bar, index) => {
+                bar.className = 'bar';
+                bar.style.gridRow = '1';
+                bar.style.height = '0%';
+                chart.appendChild(bar);
+            });
+        }
+
+        function updateProbabilitySum() {
+            const inputs = document.querySelectorAll('.probability-input');
+            probabilities = Array.from(inputs).map(input => parseFloat(input.value) || 0);
+            
+            // 计算总和
+            const sum = probabilities.reduce((a, b) => a + b, 0);
+            document.getElementById('probabilitySum').textContent = `权重总和: ${sum.toFixed(1)}`;
+            
+            // 计算累积概率
+            cumulativeProbabilities = [];
+            let runningSum = 0;
+            for (let i = 0; i < probabilities.length; i++) {
+                runningSum += probabilities[i];
+                cumulativeProbabilities.push(runningSum);
+            }
+        }
+
+        function rollSingleDice() {
+            if (cumulativeProbabilities.length === 0 || cumulativeProbabilities[5] === 0) {
+                return Math.floor(Math.random() * 6) + 1;
+            }
+            
+            const random = Math.random() * cumulativeProbabilities[5];
+            for (let i = 0; i < 6; i++) {
+                if (random < cumulativeProbabilities[i]) {
+                    return i + 1;
+                }
+            }
+            return 6;
+        }
+
+        function updateChart() {
+            const maxFrequency = Math.max(...frequency.slice(2));
+            chartBars.forEach((bar, index) => {
+                const value = frequency[index + 2];
+                const height = maxFrequency > 0 ? (value / maxFrequency * 100) : 0;
+                bar.style.height = `${height}%`;
+                bar.textContent = value > 0 ? value : '';
+            });
+        }
+
+        function updateTable() {
+            const table = document.getElementById('resultTable');
+            table.innerHTML = `
+                <tr>
+                    <th>点数和</th>
+                    <th>出现次数</th>
+                    <th>频率</th>
+                </tr>
+                ${Array.from({ length: 11 }, (_, i) => {
+                    const sum = i + 2;
+                    const count = frequency[sum];
+                    const total = document.getElementById('rolls').value;
+                    const freq = (count / total || 0).toFixed(4);
+                    return `
+                        <tr>
+                            <td>${sum}</td>
+                            <td style="font-weight: bold;">${count}</td>
+                            <td>${freq}</td>
+                        </tr>
+                    `;
+                }).join('')}
+            `;
+        }
+
+        async function animateDice() {
+            const diceElements = document.querySelectorAll('.dice');
+            for (let i = 0; i < 8; i++) {
+                diceElements.forEach(dice => {
+                    dice.textContent = Math.floor(Math.random() * 6) + 1;
+                });
+                await new Promise(resolve => setTimeout(resolve, 120));
+            }
+        }
+
+        async function startSimulation() {
+            const rollCount = parseInt(document.getElementById('rolls').value);
+            if (isNaN(rollCount) || rollCount < 1) return;
+
+            // 重置状态
+            frequency.fill(0);
+            document.querySelectorAll('.dice').forEach(dice => dice.textContent = '?');
+            initializeChart();
+            updateTable();
+
+            // 更新概率设置
+            updateProbabilitySum();
+
+            // 执行动画
+            await animateDice();
+
+            // 执行模拟
+            for (let i = 0; i < rollCount; i++) {
+                const d1 = rollSingleDice();
+                const d2 = rollSingleDice();
+                frequency[d1 + d2]++;
+            }
+
+            // 更新结果
+            updateChart();
+            updateTable();
+            
+            // 显示最终骰子结果
+            document.getElementById('dice1').textContent = rollSingleDice();
+            document.getElementById('dice2').textContent = rollSingleDice();
+        }
+
+        // 初始化图表和概率
+        initializeChart();
+        updateProbabilitySum();
+    </script>
+</body>
+</html>

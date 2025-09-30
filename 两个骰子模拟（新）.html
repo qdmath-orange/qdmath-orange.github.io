@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>双骰骰子模拟器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+
+        .dice-container {
+            text-align: center;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+
+        .dice {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border: 3px solid #333;
+            border-radius: 10px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 36px;
+            font-weight: bold;
+            margin: 10px;
+            transition: transform 0.4s ease;
+        }
+
+        .dice:hover {
+            transform: rotate(360deg);
+            cursor: pointer;
+        }
+
+        .chart {
+            display: grid;
+            grid-template-columns: repeat(11, 1fr);
+            gap: 2px;
+            background: #eee;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .bar {
+            background: #4CAF50;
+            transition: height 0.5s ease;
+            border-radius: 3px;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        input[type="number"] {
+            padding: 8px;
+            width: 120px;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 8px 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <input type="number" id="rolls" min="1" value="100" placeholder="输入抛掷次数">
+        <button onclick="startSimulation()">开始模拟</button>
+    </div>
+
+    <div class="container">
+        <div class="dice-container">
+            <div id="dice1" class="dice">?</div>
+            <div id="dice2" class="dice">?</div>
+        </div>
+
+        <div>
+            <div class="chart" id="chart"></div>
+            <h3 style="margin-top: 20px;">频数统计表</h3>
+            <table id="resultTable">
+                <tr>
+                    <th>点数和</th>
+                    <th>出现次数</th>
+                    <th>频率</th>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const frequency = new Array(13).fill(0); // 存储2-12点的频率
+        const chartBars = new Array(11).fill().map(() => document.createElement('div'));
+
+        function initializeChart() {
+            const chart = document.getElementById('chart');
+            chart.innerHTML = '';
+            chartBars.forEach((bar, index) => {
+                bar.className = 'bar';
+                bar.style.gridRow = '1';
+                bar.style.height = '0%';
+                chart.appendChild(bar);
+            });
+        }
+
+        function rollSingleDice() {
+            return Math.floor(Math.random() * 6) + 1;
+        }
+
+        function updateChart() {
+            chartBars.forEach((bar, index) => {
+                const value = frequency[index + 2];
+                const height = Math.min(value * 3, 100);
+                bar.style.height = `${height}%`;
+                bar.textContent = value > 0 ? value : '';
+            });
+        }
+
+        function updateTable() {
+            const table = document.getElementById('resultTable');
+            table.innerHTML = `
+                <tr>
+                    <th>点数和</th>
+                    <th>出现次数</th>
+                    <th>频率</th>
+                </tr>
+                ${Array.from({ length: 11 }, (_, i) => {
+                    const sum = i + 2;
+                    const count = frequency[sum];
+                    const total = document.getElementById('rolls').value;
+                    const freq = (count / total || 0).toFixed(4);
+                    return `
+                        <tr>
+                            <td>${sum}</td>
+                            <td style="font-weight: bold;">${count}</td>
+                            <td>${freq}</td>
+                        </tr>
+                    `;
+                }).join('')}
+            `;
+        }
+
+        async function animateDice() {
+            const diceElements = document.querySelectorAll('.dice');
+            for (let i = 0; i < 8; i++) {
+                diceElements.forEach(dice => {
+                    dice.textContent = Math.floor(Math.random() * 6) + 1;
+                });
+                await new Promise(resolve => setTimeout(resolve, 120));
+            }
+        }
+
+        async function startSimulation() {
+            const rollCount = parseInt(document.getElementById('rolls').value);
+            if (isNaN(rollCount) || rollCount < 1) return;
+
+            // 重置状态
+            frequency.fill(0);
+            document.querySelectorAll('.dice').forEach(dice => dice.textContent = '?');
+            initializeChart();
+            updateTable();
+
+            // 执行动画
+            await animateDice();
+
+            // 执行模拟
+            for (let i = 0; i < rollCount; i++) {
+                const d1 = rollSingleDice();
+                const d2 = rollSingleDice();
+                frequency[d1 + d2]++;
+            }
+
+            updateChart();
+            updateTable();
+        }
+
+        // 初始化图表
+        initializeChart();
+    </script>
+</body>
+</html>
