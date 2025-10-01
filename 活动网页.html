@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>超值购物平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* 顶部搜索栏 */
+        .header {
+            background-color: #e43130;
+            color: white;
+            padding: 10px 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .search-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .logo {
+            font-weight: bold;
+            font-size: 20px;
+            margin-right: 10px;
+        }
+        
+        .search-box {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 20px;
+            padding: 5px 15px;
+        }
+        
+        .search-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 8px;
+            font-size: 14px;
+        }
+        
+        .search-box i {
+            color: #999;
+        }
+        
+        .user-actions {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+        
+        /* 导航条 */
+        .nav-container {
+            background: white;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 10px 0;
+            margin-bottom: 10px;
+        }
+        
+        .nav-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .nav-item {
+            display: inline-block;
+            padding: 5px 15px;
+            text-align: center;
+        }
+        
+        .nav-item.active {
+            color: #e43130;
+            font-weight: bold;
+        }
+        
+        /* 活动区域 */
+        .activity-section {
+            margin-bottom: 15px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .section-title {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .more-link {
+            color: #999;
+            font-size: 13px;
+        }
+        
+        .activity-content {
+            padding: 15px;
+        }
+        
+        .game-options {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+        
+        .game-option {
+            text-align: center;
+            padding: 15px;
+            background: #f7f7f7;
+            border-radius: 8px;
+            width: 45%;
+        }
+        
+        .game-icon {
+            font-size: 30px;
+            color: #e43130;
+            margin-bottom: 10px;
+        }
+        
+        .game-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .game-desc {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .play-btn {
+            background: #e43130;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        /* 现金大转盘特殊样式 */
+        .wheel-section {
+            background: linear-gradient(to right, #e43130, #ff6b6b);
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .wheel-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .wheel-btn {
+            background: #ffde2e;
+            color: #e43130;
+            font-weight: bold;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 16px;
+            margin: 15px 0;
+            cursor: pointer;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部搜索栏 -->
+    <div class="header">
+        <div class="search-bar">
+            <div class="logo">超值购</div>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="搜索商品">
+            </div>
+        </div>
+        <div class="user-actions">
+            <span>首页</span>
+            <span>优惠券</span>
+            <span>订单</span>
+            <span>消息</span>
+            <span>我的</span>
+        </div>
+    </div>
+    
+    <!-- 导航条 -->
+    <div class="nav-container">
+        <div class="nav-item active">推荐</div>
+        <div class="nav-item">手机数码</div>
+        <div class="nav-item">家用电器</div>
+        <div class="nav-item">食品生鲜</div>
+        <div class="nav-item">服装鞋包</div>
+        <div class="nav-item">美妆护肤</div>
+        <div class="nav-item">家居家装</div>
+        <div class="nav-item">母婴玩具</div>
+    </div>
+    
+    <!-- 骰子赢折扣活动 -->
+    <div class="activity-section">
+        <div class="section-header">
+            <div class="section-title">骰子赢折扣</div>
+            <div class="more-link">更多</div>
+        </div>
+        <div class="activity-content">
+            <div class="game-options">
+                <div class="game-option">
+                    <div class="game-icon"><i class="fas fa-dice"></i></div>
+                    <div class="game-title">单颗骰子</div>
+                    <div class="game-desc">掷出目标点数获得折扣</div>
+                    <button class="play-btn" onclick="window.location.href='链接3%E9%AA%B0%E5%AD%90%E6%A8%A1%E6%8B%9F%E5%99%A8(1).html'">开始玩</button>
+                </div>
+                <div class="game-option">
+                    <div class="game-icon"><i class="fas fa-dice-two"></i></div>
+                    <div class="game-title">双颗骰子</div>
+                    <div class="game-desc">掷出目标点数获得折扣</div>
+                    <button class="play-btn" onclick="window.location.href='链接1'">开始玩</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 摸球赢礼品活动 -->
+    <div class="activity-section">
+        <div class="section-header">
+            <div class="section-title">摸球赢礼品</div>
+            <div class="more-link">更多</div>
+        </div>
+        <div class="activity-content">
+            <div class="game-options">
+                <div class="game-option">
+                    <div class="game-icon"><i class="fas fa-basketball"></i></div>
+                    <div class="game-title">可放回摸球</div>
+                    <div class="game-desc">摸到目标球赢礼品</div>
+                    <button class="play-btn" onclick="window.location.href='链接2'">开始玩</button>
+                </div>
+                <div class="game-option">
+                    <div class="game-icon"><i class="fas fa-baseball-ball"></i></div>
+                    <div class="game-title">不可放回摸球</div>
+                    <div class="game-desc">摸到目标球赢礼品</div>
+                    <button class="play-btn" onclick="window.location.href='链接2'">开始玩</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 现金大转盘活动 -->
+    <div class="activity-section">
+        <div class="wheel-section">
+            <div class="wheel-title">现金大转盘</div>
+            <div>转出好运，领100元现金</div>
+            <button class="wheel-btn" onclick="window.location.href='链接3'">立即转动</button>
+            <div>您有10次免费转动机会</div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>© 2023 超值购购物平台 · 消费者权益保护</p>
+    </div>
+</body>
+</html>
