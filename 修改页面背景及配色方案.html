@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>超值购物平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #ffffff;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        /* 顶部搜索栏 */
+        .header {
+            background-color: #e02e2e;
+            color: white;
+            padding: 12px 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .search-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .logo {
+            font-weight: bold;
+            font-size: 20px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 6px;
+            color: #ffde00;
+        }
+        
+        .search-box {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 18px;
+            padding: 6px 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .search-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 8px;
+            font-size: 14px;
+        }
+        
+        .search-box i {
+            color: #e02e2e;
+        }
+        
+        .user-actions {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+        
+        .user-actions span {
+            padding: 0 5px;
+        }
+        
+        /* 导航条 */
+        .nav-container {
+            background: white;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 12px 0;
+            margin: 10px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .nav-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .nav-item {
+            display: inline-block;
+            padding: 8px 18px;
+            text-align: center;
+            transition: all 0.2s;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .nav-item.active {
+            color: #e02e2e;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .nav-item.active:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 15px;
+            right: 15px;
+            height: 3px;
+            background: #e02e2e;
+            border-radius: 3px;
+        }
+        
+        /* 活动区域 */
+        .activity-section {
+            margin: 15px 10px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(224, 46, 46, 0.1);
+            border: 1px solid #f5f5f5;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            background: linear-gradient(to right, #fff7f7, #fff);
+        }
+        
+        .section-title {
+            font-weight: bold;
+            font-size: 16px;
+            color: #e02e2e;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 8px;
+            color: #e02e2e;
+        }
+        
+        .more-link {
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .activity-content {
+            padding: 15px;
+        }
+        
+        .game-options {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+        }
+        
+        .game-option {
+            text-align: center;
+            padding: 18px 12px;
+            background: #fff9f9;
+            border-radius: 10px;
+            width: 45%;
+            border: 1px solid #ffecec;
+            transition: all 0.3s;
+        }
+        
+        .game-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(224, 46, 46, 0.15);
+        }
+        
+        .game-icon {
+            font-size: 32px;
+            color: #e02e2e;
+            margin-bottom: 12px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .game-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #e02e2e;
+            font-size: 15px;
+        }
+        
+        .game-desc {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        
+        .play-btn {
+            background: linear-gradient(to right, #e02e2e, #ff4757);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 18px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 6px rgba(224, 46, 46, 0.3);
+        }
+        
+        .play-btn:hover {
+            background: linear-gradient(to right, #d02a2a, #e84141);
+            transform: scale(1.05);
+        }
+        
+        /* 现金大转盘特殊样式 */
+        .wheel-section {
+            background: linear-gradient(135deg, #e02e2e 0%, #ff6b6b 100%);
+            color: white;
+            text-align: center;
+            padding: 25px 20px;
+            margin: 20px 10px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(224, 46, 46, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .wheel-section:before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            transform: rotate(30deg);
+        }
+        
+        .wheel-title {
+            font-size: 20px;
+            margin-bottom: 12px;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .wheel-desc {
+            margin-bottom: 8px;
+            font-size: 14px;
+            position: relative;
+        }
+        
+        .wheel-btn {
+            background: #ffde00;
+            color: #e02e2e;
+            font-weight: bold;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 25px;
+            font-size: 16px;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(255, 222, 0, 0.4);
+            position: relative;
+        }
+        
+        .wheel-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 222, 0, 0.6);
+        }
+        
+        .wheel-info {
+            font-size: 13px;
+            position: relative;
+            color: #ffd9d9;
+        }
+        
+        /* 优惠券区域 */
+        .coupon-section {
+            margin: 15px 10px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #f5f5f5;
+        }
+        
+        .coupon-title {
+            font-weight: bold;
+            color: #e02e2e;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        
+        .coupon-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            padding: 5px 0;
+        }
+        
+        .coupon-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .coupon {
+            min-width: 200px;
+            background: linear-gradient(to right, #ffecec, #fff7f7);
+            border: 1px dashed #e02e2e;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .coupon-amount {
+            color: #e02e2e;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .coupon-desc {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .coupon-btn {
+            background: #e02e2e;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 12px;
+            margin-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        /* 产品推荐 */
+        .product-section {
+            margin: 15px 10px;
+        }
+        
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .product-title {
+            font-weight: bold;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+            border: 1px solid #f0f0f0;
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(45deg, #f8f8f8, #f0f0f0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ccc;
+        }
+        
+        .product-info {
+            padding: 10px;
+        }
+        
+        .product-name {
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        
+        .product-price {
+            color: #e02e2e;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .game-options {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+            
+            .game-option {
+                width: 90%;
+            }
+            
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-item {
+                padding: 8px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部搜索栏 -->
+    <div class="header">
+        <div class="search-bar">
+            <div class="logo"><i class="fas fa-shopping-bag"></i>超值购</div>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="搜索商品">
+            </div>
+        </div>
+        <div class="user-actions">
+            <span>首页</span>
+            <span>优惠券</span>
+            <span>订单</span>
+            <span>消息</span>
+            <span>我的</span>
+        </div>
+    </div>
+    
+    <!-- 导航条 -->
+    <div class="nav-container">
+        <div class="nav-item active">推荐</div>
+        <div class="nav-item">手机数码</div>
+        <div class="nav-item">家用电器</div>
+        <div class="nav-item">食品生鲜</div>
+        <div class="nav-item">服装鞋包</div>
+        <div class="nav-item">美妆护肤</div>
+        <div class="nav-item">家居家装</div>
+        <div class="nav-item">母婴玩具</div>
+    </div>
+    
+    <!-- 优惠券区域 -->
+    <div class="coupon-section">
+        <div class="coupon-title">优惠券</div>
+        <div class="coupon-container">
+            <div class="coupon">
+                <div>
+                    <div class="coupon-amount">¥5</div>
+                    <div class="coupon-desc">满30元可用</div>
+                </div>
+                <button class="coupon-btn">领取</button>
+            </div>
+            <div class="coupon">
+                <div>
+                    <div class="coupon-amount">¥10</div>
+                    <div class="coupon-desc">满50元可用</div>
+                </div>
+                <button class="coupon-btn">领取</button>
+            </div>
+            <div class="coupon">
+                <div>
+                    <div class="coupon-amount">¥20</div>
+                    <div class="coupon-desc">满100元可用</div>
+                </div>
+                <button class="coupon-btn">领取</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 骰子赢折扣活动 -->
+    <div class="activity-section">
+        <div class="section-header">
+            <div class="section-title"><i class="fas fa-dice"></i>骰子赢折扣</div>
+            <div class="more-link">更多</div>
+        </div>
+        <div class="activity-content">
+            <div class="game-options">
+                <div class="game-option">
+                    <div class="game-icon"><i class="fas fa-dice-one"></i></div>
+                    <div class="game-title">单颗骰子</div>
+                    <div class="game-desc">掷出目标点数获得折扣</div>
+                    <button class="play-btn" onclick="window.location.href='链接3%E9%AA%B0%E5%AD%90%E6%A8%A1%E6%8B%9F%E5%99%A8(1).html'">开始玩</button>
+                </div>
+                <div class="game-option">
+                    <div class="game-icon"><i class="fas fa-dice-d20"></i></div>
+                    <div class="game-title">双颗骰子</div>
+                    <div class="game-desc">掷出目标点数获得折扣</div>
+                    <button class="play-btn" onclick="window.location.href='链接1'">开始玩</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 摸球赢礼品活动 -->
+    <div class="activity-section">
+        <div class="section-header">
+            <div class="section-title"><i class="fas fa-basketball-ball"></i>摸球赢礼品</div>
+            <div class="more-link">更多</div>
+        </div>
+        <div class="activity-content">
+            <div class="game-options">
+                <div class="game-option">
+                    <div class="game-icon"><i class="fas fa-undo-alt"></i></div>
+                    <div class="game-title">可放回摸球</div>
+                    <div class="game-desc">摸到目标球赢礼品</div>
+                    <button class="play-btn" onclick="window.location.href='链接2'">开始玩</button>
+                </div>
+                <div class="game-option">
+                    <div class="game-icon"><i class="fas fa-ban"></i></div>
+                    <div class="game-title">不可放回摸球</div>
+                    <div class="game-desc">摸到目标球赢礼品</div>
+                    <button class="play-btn" onclick="window.location.href='链接2'">开始玩</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 现金大转盘活动 -->
+    <div class="wheel-section">
+        <div class="wheel-title">现金大转盘</div>
+        <div class="wheel-desc">转出好运，领100元现金</div>
+        <button class="wheel-btn" onclick="window.location.href='链接3'">立即转动</button>
+        <div class="wheel-info">您有10次免费转动机会</div>
+    </div>
+    
+    <!-- 产品推荐 -->
+    <div class="product-section">
+        <div class="product-header">
+            <div class="product-title">热门推荐</div>
+            <div class="more-link">查看更多</div>
+        </div>
+        <div class="product-grid">
+            <div class="product-card">
+                <div class="product-image">
+                    <i class="fas fa-mobile-alt fa-2x"></i>
+                </div>
+                <div class="product-info">
+                    <div class="product-name">智能手机 超清大屏 长续航</div>
+                    <div class="product-price">¥999起</div>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image">
+                    <i class="fas fa-tshirt fa-2x"></i>
+                </div>
+                <div class="product-info">
+                    <div class="product-name">纯棉T恤 多色可选 舒适透气</div>
+                    <div class="product-price">¥29.9</div>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image">
+                    <i class="fas fa-utensils fa-2x"></i>
+                </div>
+                <div class="product-info">
+                    <div class="product-name">零食大礼包 多种口味</div>
+                    <div class="product-price">¥49.9</div>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image">
+                    <i class="fas fa-laptop fa-2x"></i>
+                </div>
+                <div class="product-info">
+                    <div class="product-name">轻薄笔记本电脑 办公学习</div>
+                    <div class="product-price">¥2999</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>© 2023 超值购购物平台 · 消费者权益保护</p>
+    </div>
+
+    <script>
+        // 添加一些简单的动画效果
+        document.addEventListener('DOMContentLoaded', function() {
+            // 按钮悬停效果
+            const buttons = document.querySelectorAll('.play-btn, .wheel-btn, .coupon-btn');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.05)';
+                });
+                button.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+            
+            // 导航项点击效果
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // 优惠券领取效果
+            const couponBtns = document.querySelectorAll('.coupon-btn');
+            couponBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.textContent = '已领取';
+                    this.style.background = '#999';
+                    this.disabled = true;
+                });
+            });
+        });
+    </script>
+</body>
+</html>
